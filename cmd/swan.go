@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sh3rp/swan"
+	"github.com/sh3rp/swan/net"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 		return
 	}
 	// device IP, community
-	manager := swan.NewSwitchManager(os.Args[1], os.Args[2])
+	manager := net.NewSwitchManager(os.Args[1], os.Args[2])
 
 	ver, err := manager.GetVersion()
 
