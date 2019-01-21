@@ -20,6 +20,9 @@ var OIDS = map[string]string{
 	"ifOut1SecRate":  "1.3.6.1.4.1.2636.3.3.1.1.4",
 	"ifJnxInErrors":  "1.3.6.1.4.1.2636.3.3.1.1.9",
 	"ifJnxOutErrors": "1.3.6.1.4.1.2636.3.3.1.1.24",
+	// entity
+	"entPhysicalDescr":       "1.3.6.1.2.1.47.1.1.1.1.2.1",  // default to .1 index
+	"entPhysicalSoftwareRev": "1.3.6.1.2.1.47.1.1.1.1.10.1", //default to .1 index
 }
 
 type SwitchManager interface {
@@ -29,8 +32,10 @@ type SwitchManager interface {
 }
 
 type SwitchInfo struct {
-	Hostname  string
-	OSVersion version.OSVersion
+	Hostname          string
+	OSVersion         version.OSVersion
+	Chassis           string
+	EntitySoftwareRev string
 }
 
 type SwitchInterface struct {
@@ -72,7 +77,11 @@ func (sm switchManager) GetVersion() (SwitchInfo, error) {
 
 	defer sm.snmp.Conn.Close()
 
-	oids := []string{OIDS["sysDescr"], OIDS["sysName"]}
+	oids := []string{OIDS["sysDescr"],
+		OIDS["sysName"],
+		OIDS["entPhysicalDescr"],
+		OIDS["entPhysicalSoftwareRev"],
+	}
 
 	result, err := sm.snmp.Get(oids)
 
@@ -80,9 +89,16 @@ func (sm switchManager) GetVersion() (SwitchInfo, error) {
 		return SwitchInfo{}, err
 	}
 
+	hostname := string(result.Variables[1].Value.([]byte))
+	osVersion := version.GetVersion(string(result.Variables[0].Value.([]byte)))
+	chassis := string(result.Variables[2].Value.([]byte))
+	softwareRev := string(result.Variables[3].Value.([]byte))
+
 	return SwitchInfo{
-		Hostname:  string(result.Variables[1].Value.([]byte)),
-		OSVersion: version.GetVersion(string(result.Variables[0].Value.([]byte))),
+		Hostname:          hostname,
+		OSVersion:         osVersion,
+		Chassis:           chassis,
+		EntitySoftwareRev: softwareRev,
 	}, nil
 }
 
