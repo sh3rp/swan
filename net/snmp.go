@@ -1,9 +1,10 @@
-package swan
+package net
 
 import (
 	"fmt"
 	"time"
 
+	"github.com/sh3rp/swan/version"
 	"github.com/soniah/gosnmp"
 )
 
@@ -29,7 +30,7 @@ type SwitchManager interface {
 
 type SwitchInfo struct {
 	Hostname  string
-	OSVersion string
+	OSVersion version.OSVersion
 }
 
 type SwitchInterface struct {
@@ -81,7 +82,7 @@ func (sm switchManager) GetVersion() (SwitchInfo, error) {
 
 	return SwitchInfo{
 		Hostname:  string(result.Variables[1].Value.([]byte)),
-		OSVersion: string(result.Variables[0].Value.([]byte)),
+		OSVersion: version.GetVersion(string(result.Variables[0].Value.([]byte))),
 	}, nil
 }
 

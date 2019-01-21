@@ -23,6 +23,7 @@ func main() {
 	}
 
 	fmt.Printf("%s\n\n", ver.Hostname)
+	fmt.Printf("%+v\n\n", ver.OSVersion)
 
 	intfs, err := manager.GetIfs()
 
